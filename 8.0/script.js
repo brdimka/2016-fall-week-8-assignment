@@ -90,8 +90,58 @@ function draw(rows){
 
     //Draw dots
 
+    function draw(rows){
+      var node = plot.selectAll('.node')
+        .data(rows,function(d){return d.values});
+        //enter
+        var nodeEnter = node.enter()
+          .append('circle')
+          .attr('class','node')
+          .on('click',function(d,i))
 
-    //Draw <path>
+    })
+    .on('mouseenter',function(d){
+      var tooltip = d3.select('custom-tooltip');
+      tooltip.select('title')
+        .html(d.item + ', ' + d.flightsByTravelDate())
+      tooltip.select('.value')
+        .html(d.value);
+    })
+    .on('mousemove',function(d){
+      var tooltip = d3.select('.custom-tooltip');
+      var xy = d3.mouse(d3.select('.container').node());
+      tooltip
+        .style('left',xy[0]+10+'px')
+        .style('top',xy[1]+10+'px');
+    })
+    .on('mouseleave',function(d){
+      var tooltip = d3.select('custom-tooltip');
+      tooltip.transition().style('opacity',0);
+    })
+    nodeEnter
+      .attr('cx',function(d){return scaleX(d.flightsByTravelDate)})
+      .attr('cy',function(d){return scaleY(d.price)})
+      .merge(node)
+      .attr('r',4)
+      .attr('cx',function(d){return scaleX(d.flightsByTravelDate)})
+      .attr('cy',function(d){return scaleY(d.price)})
+      .style('fill',function(d){return scaleColor(d.price)});
+
+    node.exit().remove();
+
+    plot.select('.axis-x')
+      .datum(rows)
+      .transtion()
+      .attr('d',function(datum){
+        return lineGenerator(datum);
+      })
+      .style('fill','none')
+      .style('stroke-width','2px')
+      .style('stroke',function(datum){
+        return scaleColor(datum[0].item);
+      });
+    }
+
 }
 
 function parse(d){
